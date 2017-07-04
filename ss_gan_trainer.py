@@ -39,7 +39,7 @@ class SsGanTrainer(base_trainer.BaseTrainer):
 
     self.generator = Sequential()
     self.generator.add(Dense(7*7*256, input_shape=(100,)))
-    self.generator.add(BatchNormalization())
+    #self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
     if keras.backend.image_data_format() == 'channels_first':
         self.generator.add(Reshape([256, 7, 7]))
