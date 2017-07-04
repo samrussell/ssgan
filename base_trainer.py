@@ -44,7 +44,7 @@ class BaseTrainer:
     num_samples = training_values.shape[0]
     num_fakes = int(num_samples / self.num_classes)
 
-    for _ in xrange(self.epochs):
+    for i in xrange(self.epochs):
       fake_values = np.random.uniform(0,1,size=[num_fakes,100])
       fake_labels = to_categorical(np.full((num_fakes, 1), self.num_classes), self.num_classes+1)
       self.real_image_model.fit(training_values, training_labels,
@@ -56,7 +56,11 @@ class BaseTrainer:
                 batch_size=self.batch_size,
                 epochs=1,
                 verbose=1)
+      self.save_results("test_%d.png" % i)
 
+    #self.test_results(testing_values, testing_labels)
+
+  def save_results(self, filename):
     # save some samples
     fake_values = np.random.uniform(0,1,size=[16,100])
     images = self.generator.predict(fake_values)
@@ -70,10 +74,8 @@ class BaseTrainer:
       plt.axis('off')
     plt.tight_layout()
 
-    plt.savefig("test_images.png")
+    plt.savefig(filename)
     plt.close('all')
-
-    #self.test_results(testing_values, testing_labels)
 
   #def test_results(self, testing_values, testing_labels):
     #predictions = self.model.predict(testing_values)
