@@ -32,8 +32,8 @@ class BaseTrainer:
     testing_values, testing_labels = self.load_testing_data()
     training_values, validation_values = self.split_data(shaped_values)
     training_labels, validation_labels = self.split_data(shaped_labels)
-    training_values = training_values[:1000]
-    training_labels = training_labels[:1000]
+    #training_values = training_values[:1000]
+    #training_labels = training_labels[:1000]
 
     print('values shape:', shaped_values.shape)
     print(training_values.shape[0], 'training samples')

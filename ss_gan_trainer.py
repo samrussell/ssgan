@@ -39,7 +39,7 @@ class SsGanTrainer(base_trainer.BaseTrainer):
 
     self.generator = Sequential()
     self.generator.add(Dense(7*7*256, input_shape=(100,)))
-    self.generator.add(BatchNormalization())
+    #self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
     if keras.backend.image_data_format() == 'channels_first':
         self.generator.add(Reshape([256, 7, 7]))
@@ -48,12 +48,12 @@ class SsGanTrainer(base_trainer.BaseTrainer):
     self.generator.add(Dropout(0.5))
     self.generator.add(UpSampling2D(size=(2, 2)))
     self.generator.add(Conv2D(128, (5, 5), padding='same'))
-    self.generator.add(BatchNormalization())
+    #self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
     self.generator.add(Dropout(0.5))
     self.generator.add(UpSampling2D(size=(2, 2)))
     self.generator.add(Conv2D(256, (5, 5), padding='same'))
-    self.generator.add(BatchNormalization())
+    #self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
     # we're ignoring input shape - just assuming it's 7,7,1
     self.generator.add(Conv2D(1, (5, 5), padding='same'))
