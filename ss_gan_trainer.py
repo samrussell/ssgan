@@ -1,5 +1,8 @@
 # Implementation of Semi-Supervised Learning with Generative Adversarial Networks by Augustus Odena
 # https://arxiv.org/pdf/1606.01583.pdf
+# Also draws on UNSUPERVISED AND SEMI-SUPERVISED LEARNING WITH CATEGORICAL GENERATIVE ADVERSARIAL NETWORKS
+# by Jost Tobias Springenberg
+# https://arxiv.org/pdf/1511.06390.pdf
 # Code (c) Sam Russell 2017
 
 import base_trainer
