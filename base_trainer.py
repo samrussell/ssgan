@@ -45,35 +45,40 @@ class BaseTrainer:
     # do this in a loop
     num_samples = training_values.shape[0]
     #num_fakes = int(num_samples / self.num_classes)
-    num_fakes = num_samples
-
+    #num_fakes = num_samples
+    num_to_train = 1000
     for i in xrange(self.epochs):
-      # we want the discriminator to guess the fakes
-      print("generating images")
-      fake_categories = np.random.choice(self.num_classes,num_fakes)
-      fake_vectors = to_categorical(fake_categories, self.num_classes+1)
-      random_value_part = np.random.uniform(0,1,size=[num_fakes,100-(self.num_classes+1)])
-      fake_values = np.concatenate((fake_vectors, random_value_part), axis=1)
-      fake_labels = to_categorical(np.full((num_fakes, 1), self.num_classes), self.num_classes+1)
-      fake_images = self.generator.predict(fake_values, verbose=0)
+      for offset in range(0, num_samples, num_to_train)[:-1]:
+        # we want the discriminator to guess the fakes
+        print("generating images")
+        start = offset * num_to_train
+        end = start + num_to_train
+        training_value_batch = training_values[start:end]
+        training_label_batch = training_labels[start:end]
+        fake_categories = np.random.choice(self.num_classes,num_to_train)
+        fake_vectors = to_categorical(fake_categories, self.num_classes+1)
+        random_value_part = np.random.uniform(0,1,size=[num_to_train,100-(self.num_classes+1)])
+        fake_values = np.concatenate((fake_vectors, random_value_part), axis=1)
+        fake_labels = to_categorical(np.full((num_to_train, 1), self.num_classes), self.num_classes+1)
+        fake_images = self.generator.predict(fake_values, verbose=0)
 
-      print("training discriminator")
-      self.discriminator.trainable = True
-      self.real_image_model.fit(np.concatenate((training_values, fake_images)),
-                np.concatenate((training_labels, fake_labels)),
-                batch_size=self.batch_size,
-                epochs=1,
-                verbose=1,
-                validation_data=(validation_values, validation_labels))
+        print("training discriminator")
+        self.discriminator.trainable = True
+        self.real_image_model.fit(np.concatenate((training_value_batch, fake_images)),
+                  np.concatenate((training_label_batch, fake_labels)),
+                  batch_size=self.batch_size,
+                  epochs=1,
+                  verbose=1,
+                  validation_data=(validation_values, validation_labels))
 
-      # we want the discriminator to guess the category we injected
-      print("training generator")
-      self.discriminator.trainable = False
-      self.fake_image_model.fit(fake_values, fake_vectors,
-                batch_size=self.batch_size,
-                epochs=1,
-                verbose=1)
-      self.save_results("test_%d.png" % i)
+        # we want the discriminator to guess the category we injected
+        print("training generator")
+        self.discriminator.trainable = False
+        self.fake_image_model.fit(fake_values, fake_vectors,
+                  batch_size=self.batch_size,
+                  epochs=1,
+                  verbose=1)
+        self.save_results("test_%d_%d.png" % (i, offset))
 
     #self.test_results(testing_values, testing_labels)
 
