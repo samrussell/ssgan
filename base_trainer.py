@@ -32,6 +32,8 @@ class BaseTrainer:
     testing_values, testing_labels = self.load_testing_data()
     training_values, validation_values = self.split_data(shaped_values)
     training_labels, validation_labels = self.split_data(shaped_labels)
+    training_values = training_values[:1000]
+    training_labels = training_labels[:1000]
 
     print('values shape:', shaped_values.shape)
     print(training_values.shape[0], 'training samples')
@@ -42,11 +44,12 @@ class BaseTrainer:
     # training
     # do this in a loop
     num_samples = training_values.shape[0]
-    num_fakes = int(num_samples / self.num_classes)
+    #num_fakes = int(num_samples / self.num_classes)
+    num_fakes = num_samples
 
     for i in xrange(self.epochs):
       # we want the discriminator to guess the fakes
-      print("generating random data")
+      print("generating images")
       fake_categories = np.random.choice(self.num_classes,num_fakes)
       fake_vectors = to_categorical(fake_categories, self.num_classes+1)
       random_value_part = np.random.uniform(0,1,size=[num_fakes,100-(self.num_classes+1)])
