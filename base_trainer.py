@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 class BaseTrainer:
   batch_size = 128
   num_classes = 10
-  epochs = 1#2
+  epochs = 12
   validation_percentage = 0.99
   img_rows = 28
   img_cols = 28
