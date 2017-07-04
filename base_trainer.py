@@ -51,10 +51,8 @@ class BaseTrainer:
       for offset in range(0, num_samples, num_to_train)[:-1]:
         # we want the discriminator to guess the fakes
         print("generating images")
-        start = offset * num_to_train
-        end = start + num_to_train
-        training_value_batch = training_values[start:end]
-        training_label_batch = training_labels[start:end]
+        training_value_batch = training_values[offset:offset+num_to_train]
+        training_label_batch = training_labels[offset:offset+num_to_train]
         fake_categories = np.random.choice(self.num_classes,num_to_train)
         fake_vectors = to_categorical(fake_categories, self.num_classes+1)
         random_value_part = np.random.uniform(0,1,size=[num_to_train,100-(self.num_classes+1)])
