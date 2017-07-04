@@ -45,14 +45,22 @@ class BaseTrainer:
     num_fakes = int(num_samples / self.num_classes)
 
     for i in xrange(self.epochs):
+      # we want the discriminator to guess the fakes
       fake_values = np.random.uniform(0,1,size=[num_fakes,100])
       fake_labels = to_categorical(np.full((num_fakes, 1), self.num_classes), self.num_classes+1)
-      self.real_image_model.fit(training_values, training_labels,
+      fake_images = self.generator.predict(fake_values, verbose=0)
+      self.discriminator.trainable = True
+      self.real_image_model.fit(np.concatenate((training_values, fake_images)),
+                np.concatenate((training_labels, fake_labels)),
                 batch_size=self.batch_size,
                 epochs=1,
                 verbose=1,
                 validation_data=(validation_values, validation_labels))
-      self.fake_image_model.fit(fake_values, fake_labels,
+
+      # we want the discriminator to guess wrong
+      confused_labels = np.full((num_fakes, 11), ([0.1] * self.num_classes + [0.0]))
+      self.discriminator.trainable = False
+      self.fake_image_model.fit(fake_values, confused_labels,
                 batch_size=self.batch_size,
                 epochs=1,
                 verbose=1)

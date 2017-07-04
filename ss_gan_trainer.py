@@ -63,6 +63,7 @@ class SsGanTrainer(base_trainer.BaseTrainer):
 
     self.fake_image_model = Sequential()
     self.fake_image_model.add(self.generator)
+    self.discriminator.trainable = False
     self.fake_image_model.add(self.discriminator)
     self.fake_image_model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=1e-4))
 
