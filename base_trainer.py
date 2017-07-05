@@ -15,14 +15,16 @@ class BaseTrainer:
 
   def __init__(self):
     # set up commandline arguments
-    #self.parser = argparse.ArgumentParser()
+    self.parser = argparse.ArgumentParser()
+    self.parser.add_argument('--save', help='save to file (default false)', default=False, action='store_true')
+    self.parser.add_argument('--load', help='load from file (default false)', default=False, action='store_true')
     #self.parser.add_argument('--train', help='training data CSV', required=True)
     #self.parser.add_argument('--test', help='test data CSV', required=True)
     #self.parser.add_argument('--output', help='output data CSV', required=True)
     pass
 
   def run(self):
-    #self.load_args()
+    self.load_args()
     self.load_data()
     shaped_values, shaped_labels = self.load_training_data()
     testing_values, testing_labels = self.load_testing_data()
@@ -36,6 +38,10 @@ class BaseTrainer:
     print(validation_values.shape[0], 'validation samples')
 
     self.build_models(input_shape=training_values.shape[1:])
+
+    if self.commandline_args.load:
+      self.generator.load_weights("generator.h5")
+      self.discriminator.load_weights("discriminator.h5")
 
     # training
     # do this in a loop
@@ -74,6 +80,10 @@ class BaseTrainer:
                   epochs=1,
                   verbose=1)
         self.save_results("test_%d_%d.png" % (i, offset))
+      # checkpoint data
+      if self.commandline_args.save:
+        self.generator.save_weights("generator.h5")
+        self.discriminator.save_weights("discriminator.h5")
 
     #self.test_results(testing_values, testing_labels)
 
@@ -106,8 +116,8 @@ class BaseTrainer:
     # save results
     #df.to_csv(self.commandline_args.output, index=False)
 
-  #def load_args(self):
-  #  self.commandline_args = self.parser.parse_args()
+  def load_args(self):
+    self.commandline_args = self.parser.parse_args()
 
   def scale_values(self, values):
     return values.astype('float32') / 255
