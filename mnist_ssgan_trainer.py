@@ -58,7 +58,7 @@ class MnistSsganTrainer(base_trainer.BaseTrainer):
     self.generator.add(Activation('relu'))
     self.generator.add(Dropout(0.5))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Conv2D(256, (5, 5), padding='same'))
+    self.generator.add(Conv2D(64, (5, 5), padding='same'))
     self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
     # we're ignoring input shape - just assuming it's 7,7,1
