@@ -28,43 +28,44 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator = Sequential()
     self.discriminator.add(Conv2D(64, (5, 5), strides=(2, 2), padding = 'same', activation='relu', input_shape=input_shape))
     self.discriminator.add(LeakyReLU(0.2))
-    #self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Conv2D(128, (5, 5), strides=(2, 2), padding = 'same', activation='relu'))
     self.discriminator.add(LeakyReLU(0.2))
-    #self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Conv2D(256, (5, 5), strides=(2, 2), padding = 'same', activation='relu'))
     self.discriminator.add(LeakyReLU(0.2))
-    #self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(0.5))
     # 8x8 for CIFAR
-    self.discriminator.add(Conv2D(512, (5, 5), strides=(2, 2), padding = 'same', activation='relu'))
-    self.discriminator.add(LeakyReLU(0.2))
+    #self.discriminator.add(Conv2D(512, (5, 5), strides=(2, 2), padding = 'same', activation='relu'))
+    #self.discriminator.add(LeakyReLU(0.2))
     #self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Flatten())
     self.discriminator.add(Dense(1+self.num_classes,activation='softmax'))
     self.discriminator.summary()
 
     self.generator = Sequential()
-    self.generator.add(Dense(4*4*512, input_shape=(100,)))
+    self.generator.add(Dense(8*8*256, input_shape=(100,)))
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
     if keras.backend.image_data_format() == 'channels_first':
-        self.generator.add(Reshape([512, 4, 4]))
+        self.generator.add(Reshape([256, 8, 8]))
     else:    
-        self.generator.add(Reshape([4, 4, 512]))
-    #self.generator.add(Dropout(0.5))
-    self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Conv2D(256, (5, 5), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
-    #self.generator.add(Dropout(0.5))
+        self.generator.add(Reshape([8, 8, 256]))
+    self.generator.add(Dropout(0.5))
     self.generator.add(UpSampling2D(size=(2, 2)))
     self.generator.add(Conv2D(128, (5, 5), padding='same'))
+    self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
-    #self.generator.add(Dropout(0.5))
+    self.generator.add(Dropout(0.5))
     self.generator.add(UpSampling2D(size=(2, 2)))
     self.generator.add(Conv2D(64, (5, 5), padding='same'))
     self.generator.add(BatchNormalization())
     self.generator.add(Activation('relu'))
+    #self.generator.add(Dropout(0.5))
+    #self.generator.add(UpSampling2D(size=(2, 2)))
+    #self.generator.add(Conv2D(64, (5, 5), padding='same'))
+    #self.generator.add(BatchNormalization())
+    #self.generator.add(Activation('relu'))
     # we're ignoring input shape - just assuming it's 4,4,3
     self.generator.add(Conv2D(3, (5, 5), padding='same'))
     self.generator.add(Activation('sigmoid'))
@@ -73,7 +74,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.real_image_model = Sequential()
     self.real_image_model.add(self.discriminator)
     self.real_image_model.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-5),
+                                  optimizer=Adam(lr=1e-4),
                                   metrics=['accuracy'])
 
     self.fake_image_model = Sequential()
@@ -81,7 +82,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.trainable = False
     self.fake_image_model.add(self.discriminator)
     self.fake_image_model.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-5),
+                                  optimizer=Adam(lr=1e-4),
                                   metrics=['accuracy'])
 
   def load_data(self):
