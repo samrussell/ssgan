@@ -26,13 +26,13 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
 
   def build_models(self, input_shape):
     self.discriminator = Sequential()
-    self.discriminator.add(Conv2D(64, (5, 5), strides=(2, 2), padding = 'same', activation='relu', input_shape=input_shape))
+    self.discriminator.add(Conv2D(64, (5, 5), strides=(2, 2), padding = 'same', input_shape=input_shape))
     self.discriminator.add(LeakyReLU(0.2))
     self.discriminator.add(Dropout(0.5))
-    self.discriminator.add(Conv2D(128, (5, 5), strides=(2, 2), padding = 'same', activation='relu'))
+    self.discriminator.add(Conv2D(128, (5, 5), strides=(2, 2), padding = 'same'))
     self.discriminator.add(LeakyReLU(0.2))
     self.discriminator.add(Dropout(0.5))
-    self.discriminator.add(Conv2D(256, (5, 5), strides=(2, 2), padding = 'same', activation='relu'))
+    self.discriminator.add(Conv2D(256, (5, 5), strides=(2, 2), padding = 'same'))
     self.discriminator.add(LeakyReLU(0.2))
     self.discriminator.add(Dropout(0.5))
     # 8x8 for CIFAR
