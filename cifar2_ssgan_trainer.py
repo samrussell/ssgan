@@ -91,11 +91,15 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.generator.add(Activation('sigmoid'))
     self.generator.summary()
 
-    self.real_image_model = Sequential()
-    self.real_image_model.add(self.discriminator)
-    self.real_image_model.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-4),
-                                  metrics=['accuracy'])
+    self.generator.compile(loss='categorical_crossentropy',
+                           optimizer=Adam(lr=1e-6),
+                           metrics=['accuracy'])
+
+    self.discriminator.compile(loss='categorical_crossentropy',
+                               optimizer=Adam(lr=1e-5),
+                               metrics=['accuracy'])
+
+    self.real_image_model = self.discriminator
 
     self.fake_image_model = Sequential()
     self.fake_image_model.add(self.generator)

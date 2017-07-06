@@ -78,11 +78,11 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     #                              metrics=['accuracy'])
 
     self.generator.compile(loss='categorical_crossentropy',
-                           optimizer=Adam(lr=1e-4),
+                           optimizer=Adam(lr=1e-6),
                            metrics=['accuracy'])
 
     self.discriminator.compile(loss='categorical_crossentropy',
-                               optimizer=Adam(lr=1e-4),
+                               optimizer=Adam(lr=1e-5),
                                metrics=['accuracy'])
 
     self.real_image_model = self.discriminator
