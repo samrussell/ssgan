@@ -21,6 +21,17 @@ from keras.utils import to_categorical
 from keras.datasets import cifar10
 import keras
 
+def selu(x):
+    """Scaled Exponential Linear Unit. (Klambauer et al., 2017)
+    # Arguments
+        x: A tensor or variable to compute the activation function for.
+    # References
+        - [Self-Normalizing Neural Networks](https://arxiv.org/abs/1706.02515)
+    """
+    alpha = 1.6732632423543772848170429916717
+    scale = 1.0507009873554804934193349852946
+    return scale * K.elu(x, alpha)
+
 class CifarSsganTrainer(base_trainer.BaseTrainer):
   img_rows = 32
   img_cols = 32
@@ -60,33 +71,33 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
         self.generator.add(Reshape([8, 8, 192]))
     self.generator.add(Dropout(0.2))
     self.generator.add(Conv2D(192, (1, 1), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(Conv2D(192, (3, 3), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
     self.generator.add(Dropout(0.2))
     self.generator.add(Conv2D(192, (3, 3), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(Conv2D(192, (3, 3), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(Conv2D(192, (3, 3), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
     self.generator.add(Dropout(0.2))
     self.generator.add(Conv2D(96, (3, 3), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(Conv2D(96, (3, 3), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(Conv2D(96, (3, 3), padding='same'))
-    self.generator.add(BatchNormalization())
-    self.generator.add(Activation('relu'))
+    #self.generator.add(BatchNormalization())
+    self.generator.add(Activation(selu))
     self.generator.add(Conv2D(3, (3, 3), padding='same'))
     self.generator.add(Activation('sigmoid'))
     self.generator.summary()
@@ -106,7 +117,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.trainable = False
     self.fake_image_model.add(self.discriminator)
     self.fake_image_model.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-5),
+                                  optimizer=Adam(lr=1e-6),
                                   metrics=['accuracy'])
 
   def load_data(self):
