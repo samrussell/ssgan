@@ -65,7 +65,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
 
     self.generator = Sequential()
     self.generator.add(Dense(8*8*192, input_shape=(100,)))
-    self.generator.add(Activation(selu))
+    self.generator.add(Activation('relu'))
     if keras.backend.image_data_format() == 'channels_first':
         self.generator.add(Reshape([192, 8, 8]))
     else:    
@@ -104,7 +104,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.generator.summary()
 
     self.generator.compile(loss='categorical_crossentropy',
-                           optimizer=Adam(lr=1e-5),
+                           optimizer=Adam(lr=1e-6),
                            metrics=['accuracy'])
 
     self.discriminator.compile(loss='categorical_crossentropy',
@@ -118,7 +118,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.trainable = False
     self.fake_image_model.add(self.discriminator)
     self.fake_image_model.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-5),
+                                  optimizer=Adam(lr=1e-6),
                                   metrics=['accuracy'])
 
   def load_data(self):
