@@ -55,11 +55,11 @@ class BaseTrainer:
         print("generating images")
         training_value_batch = training_values[offset:offset+num_to_train]
         training_label_batch = training_labels[offset:offset+num_to_train]
-        fake_categories = np.random.choice(self.num_classes,num_to_train)
+        fake_categories = np.random.choice(self.num_classes,fakes_to_train)
         fake_vectors = to_categorical(fake_categories, self.num_classes+1)
-        random_value_part = np.random.uniform(0,1,size=[num_to_train,100-(self.num_classes+1)])
+        random_value_part = np.random.uniform(0,1,size=[fakes_to_train,100-(self.num_classes+1)])
         fake_values = np.concatenate((fake_vectors, random_value_part), axis=1)
-        fake_labels = to_categorical(np.full((num_to_train, 1), self.num_classes), self.num_classes+1)
+        fake_labels = to_categorical(np.full((fakes_to_train, 1), self.num_classes), self.num_classes+1)
         fake_images = self.generator.predict(fake_values, verbose=0)
 
         print("training discriminator")
