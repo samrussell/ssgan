@@ -88,7 +88,11 @@ class BaseTrainer:
 
   def save_results(self, filename):
     # save some samples
-    fake_values = np.random.uniform(0,1,size=[16,100])
+    fake_categories = np.random.choice(self.num_classes,16)
+    fake_vectors = to_categorical(fake_categories, self.num_classes+1)
+    random_value_part = np.random.uniform(0,1,size=[16,100-(self.num_classes+1)])
+    fake_values = np.concatenate((fake_vectors, random_value_part), axis=1)
+    #fake_values = np.random.uniform(0,1,size=[16,100])
     images = self.generator.predict(fake_values)
     plt.figure(figsize=(10,10))
 
