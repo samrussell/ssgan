@@ -64,8 +64,11 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.summary()
 
     self.generator = Sequential()
-    self.generator.add(Dense(8*8*192, input_shape=(100,)))
+    self.generator.add(Dense(100, input_shape=(100,)))
     self.generator.add(Activation('relu'))
+    #self.generator.add(Dropout(0.2))
+    self.generator.add(Dense(8*8*192))
+    self.generator.add(Activation(selu))
     if keras.backend.image_data_format() == 'channels_first':
         self.generator.add(Reshape([192, 8, 8]))
     else:    
@@ -78,7 +81,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.2))
+    #self.generator.add(Dropout(0.2))
     self.generator.add(Conv2D(192, (3, 3), padding='same'))
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
@@ -89,7 +92,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.2))
+    #self.generator.add(Dropout(0.2))
     self.generator.add(Conv2D(96, (3, 3), padding='same'))
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
