@@ -64,8 +64,8 @@ class BaseTrainer:
 
         print("training discriminator")
         self.discriminator.trainable = True
-        self.real_image_model.fit(np.concatenate((training_value_batch, fake_images[:fakes_to_train])),
-                  np.concatenate((training_label_batch, fake_labels[:fakes_to_train])),
+        self.real_image_model.fit(np.concatenate((training_value_batch, fake_images[:num_to_train])),
+                  np.concatenate((training_label_batch, fake_labels[:num_to_train])),
                   batch_size=self.batch_size,
                   epochs=1,
                   verbose=1,
