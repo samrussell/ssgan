@@ -34,6 +34,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
   img_rows = 32
   img_cols = 32
   img_channels = 3
+  num_classes = 10
 
   def build_models(self, input_shape):
     self.discriminator = Sequential()

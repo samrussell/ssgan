@@ -3,8 +3,6 @@
 # Also draws on UNSUPERVISED AND SEMI-SUPERVISED LEARNING WITH CATEGORICAL GENERATIVE ADVERSARIAL NETWORKS
 # by Jost Tobias Springenberg
 # https://arxiv.org/pdf/1511.06390.pdf
-# Then based on STRIVING FOR SIMPLICITY: THE ALL CONVOLUTIONAL NET
-# https://arxiv.org/pdf/1412.6806.pdf
 # Code (c) Sam Russell 2017
 
 import base_trainer
@@ -20,6 +18,7 @@ from keras.activations import *
 from keras.utils import to_categorical
 from keras.datasets import cifar10
 import keras
+import numpy as np
 
 def selu(x):
     """Scaled Exponential Linear Unit. (Klambauer et al., 2017)
@@ -36,72 +35,60 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
   img_rows = 32
   img_cols = 32
   img_channels = 3
-  num_classes = 10
+  num_classes = 1
 
   def build_models(self, input_shape):
     self.discriminator = Sequential()
-    self.discriminator.add(Conv2D(96, (3, 3), padding = 'same', input_shape=input_shape))
+    self.discriminator.add(Conv2D(64, (5, 5), strides=(2, 2), padding = 'same', input_shape=input_shape))
     self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Conv2D(96, (3, 3), padding = 'same'))
+    self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Conv2D(128, (5, 5), strides=(2, 2), padding = 'same'))
     self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Conv2D(96, (3, 3), strides=(2, 2), padding = 'same'))
+    self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Conv2D(256, (5, 5), strides=(2, 2), padding = 'same'))
     self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Dropout(0.2))
-    self.discriminator.add(Conv2D(192, (3, 3), padding = 'same'))
-    self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Conv2D(192, (3, 3), padding = 'same'))
-    self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Conv2D(192, (3, 3), strides=(2, 2), padding = 'same'))
-    self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Dropout(0.2))
-    self.discriminator.add(Conv2D(192, (3, 3), padding = 'same'))
-    self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Conv2D(192, (1, 1), padding = 'same'))
-    self.discriminator.add(LeakyReLU(0.2))
+    self.discriminator.add(Dropout(0.5))
+    # 8x8 for CIFAR
+    #self.discriminator.add(Conv2D(512, (5, 5), strides=(2, 2), padding = 'same', activation='relu'))
+    #self.discriminator.add(LeakyReLU(0.2))
+    #self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Flatten())
-    self.discriminator.add(Dropout(0.2))
     self.discriminator.add(Dense(1+self.num_classes,activation='softmax'))
     self.discriminator.summary()
 
     self.generator = Sequential()
-    self.generator.add(Dense(8*8*192, input_shape=(100,)))
+    self.generator.add(Dense(8*8*256, input_shape=(100,)))
+    #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
     if keras.backend.image_data_format() == 'channels_first':
-        self.generator.add(Reshape([192, 8, 8]))
+        self.generator.add(Reshape([256, 8, 8]))
     else:    
-        self.generator.add(Reshape([8, 8, 192]))
-    self.generator.add(Dropout(0.2))
-    self.generator.add(Conv2D(192, (1, 1), padding='same'))
-    #self.generator.add(BatchNormalization())
-    self.generator.add(Activation(selu))
-    self.generator.add(Conv2D(192, (3, 3), padding='same'))
-    #self.generator.add(BatchNormalization())
-    self.generator.add(Activation(selu))
+        self.generator.add(Reshape([8, 8, 256]))
+    self.generator.add(Dropout(0.5))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.2))
-    self.generator.add(Conv2D(192, (3, 3), padding='same'))
+    self.generator.add(Conv2D(128, (5, 5), padding='same'))
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
-    self.generator.add(Conv2D(192, (3, 3), padding='same'))
-    #self.generator.add(BatchNormalization())
-    self.generator.add(Activation(selu))
-    self.generator.add(Conv2D(192, (3, 3), padding='same'))
-    #self.generator.add(BatchNormalization())
-    self.generator.add(Activation(selu))
+    self.generator.add(Dropout(0.5))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.2))
-    self.generator.add(Conv2D(96, (3, 3), padding='same'))
+    self.generator.add(Conv2D(64, (5, 5), padding='same'))
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
-    self.generator.add(Conv2D(96, (3, 3), padding='same'))
+    #self.generator.add(Dropout(0.5))
+    #self.generator.add(UpSampling2D(size=(2, 2)))
+    #self.generator.add(Conv2D(64, (5, 5), padding='same'))
     #self.generator.add(BatchNormalization())
-    self.generator.add(Activation(selu))
-    self.generator.add(Conv2D(96, (3, 3), padding='same'))
-    #self.generator.add(BatchNormalization())
-    self.generator.add(Activation(selu))
-    self.generator.add(Conv2D(3, (3, 3), padding='same'))
+    #self.generator.add(Activation('relu'))
+    # we're ignoring input shape - just assuming it's 4,4,3
+    self.generator.add(Conv2D(3, (5, 5), padding='same'))
     self.generator.add(Activation('sigmoid'))
     self.generator.summary()
+
+    #self.real_image_model = Sequential()
+    #self.real_image_model.add(self.discriminator)
+    #self.real_image_model.compile(loss='categorical_crossentropy',
+    #                              optimizer=Adam(lr=1e-4),
+    #                              metrics=['accuracy'])
 
     self.generator.compile(loss='categorical_crossentropy',
                            optimizer=Adam(lr=1e-6),
@@ -130,7 +117,8 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     #labels = training_dataframe.values[:,0]
     (X_train, y_train), (X_test, y_test) = self.cifar_data
     
-    shaped_labels = to_categorical(y_train, self.num_classes+1)
+    #shaped_labels = to_categorical(y_train, self.num_classes+1)
+    shaped_labels = to_categorical(np.full((y_train.shape[0], 1), 0), self.num_classes+1)
     scaled_values = self.scale_values(X_train)
     shaped_values = self.reshape_values(scaled_values)
 
@@ -141,7 +129,8 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     #values = testing_dataframe.values
     
     (X_train, y_train), (X_test, y_test) = self.cifar_data
-    shaped_labels = to_categorical(y_test, self.num_classes+1)
+    #shaped_labels = to_categorical(y_test, self.num_classes+1)
+    shaped_labels = to_categorical(np.full((y_train.shape[0], 1), 0), self.num_classes+1)
     scaled_values = self.scale_values(X_test)
     shaped_values = self.reshape_values(scaled_values)
 

@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 
 class BaseTrainer:
   batch_size = 128
-  num_classes = 10
   epochs = 120
   validation_percentage = 0.99
 

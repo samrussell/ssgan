@@ -23,6 +23,7 @@ class MnistSsganTrainer(base_trainer.BaseTrainer):
   img_rows = 28
   img_cols = 28
   img_channels = 1
+  num_classes = 10
 
   def build_models(self, input_shape):
     self.discriminator = Sequential()
