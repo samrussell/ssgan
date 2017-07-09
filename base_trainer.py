@@ -48,24 +48,25 @@ class BaseTrainer:
     #num_fakes = int(num_samples / self.num_classes)
     #num_fakes = num_samples
     num_to_train = 1000
-    fakes_to_train = int(num_to_train / self.num_classes) + num_to_train
+    num_fakes_for_discriminator = int(num_to_train / self.num_classes)
+    num_fakes_for_generator = num_fakes_for_discriminator + num_to_train
     for i in xrange(self.epochs):
       for offset in range(0, num_samples, num_to_train)[:-1]:
         # we want the discriminator to guess the fakes
         print("generating images")
         training_value_batch = training_values[offset:offset+num_to_train]
         training_label_batch = training_labels[offset:offset+num_to_train]
-        fake_categories = np.random.choice(self.num_classes,fakes_to_train)
+        fake_categories = np.random.choice(self.num_classes,num_fakes_for_generator)
         fake_vectors = to_categorical(fake_categories, self.num_classes+1)
-        random_value_part = np.random.uniform(0,1,size=[fakes_to_train,100-(self.num_classes+1)])
+        random_value_part = np.random.uniform(0,1,size=[num_fakes_for_generator,100-(self.num_classes+1)])
         fake_values = np.concatenate((fake_vectors, random_value_part), axis=1)
-        fake_labels = to_categorical(np.full((fakes_to_train, 1), self.num_classes), self.num_classes+1)
+        fake_labels = to_categorical(np.full((num_fakes_for_generator, 1), self.num_classes), self.num_classes+1)
         fake_images = self.generator.predict(fake_values, verbose=0)
 
         print("training discriminator")
         self.discriminator.trainable = True
-        self.real_image_model.fit(np.concatenate((training_value_batch, fake_images[:num_to_train])),
-                  np.concatenate((training_label_batch, fake_labels[:num_to_train])),
+        self.real_image_model.fit(np.concatenate((training_value_batch, fake_images[:num_fakes_for_discriminator])),
+                  np.concatenate((training_label_batch, fake_labels[:num_fakes_for_discriminator])),
                   batch_size=self.batch_size,
                   epochs=1,
                   verbose=1,
