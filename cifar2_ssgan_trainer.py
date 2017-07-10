@@ -60,6 +60,9 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.add(LeakyReLU(0.2))
     self.discriminator.add(Flatten())
     self.discriminator.add(Dropout(0.2))
+    self.discriminator.add(Dense(100))
+    self.discriminator.add(LeakyReLU(0.2))
+    self.discriminator.add(Dropout(0.2))
     self.discriminator.add(Dense(1+self.num_classes,activation='softmax'))
     self.discriminator.summary()
 
@@ -107,11 +110,11 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.generator.summary()
 
     self.generator.compile(loss='categorical_crossentropy',
-                           optimizer=Adam(lr=0.00002),
+                           optimizer=Adam(lr=0.0002),
                            metrics=['accuracy'])
 
     self.discriminator.compile(loss='categorical_crossentropy',
-                               optimizer=Adam(lr=0.00002),
+                               optimizer=Adam(lr=0.0002),
                                metrics=['accuracy'])
 
     self.real_image_model = self.discriminator
@@ -121,7 +124,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.trainable = False
     self.fake_image_model.add(self.discriminator)
     self.fake_image_model.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=0.00002),
+                                  optimizer=Adam(lr=0.0002),
                                   metrics=['accuracy'])
 
   def load_data(self):
