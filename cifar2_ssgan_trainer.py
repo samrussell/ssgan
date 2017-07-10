@@ -59,10 +59,10 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.add(Conv2D(192, (1, 1), padding = 'same'))
     self.discriminator.add(LeakyReLU(0.2))
     self.discriminator.add(Flatten())
-    self.discriminator.add(Dropout(0.2))
+    self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Dense(1000))
     self.discriminator.add(LeakyReLU(0.2))
-    self.discriminator.add(Dropout(0.2))
+    self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Dense(1+self.num_classes,activation='softmax'))
     self.discriminator.summary()
 
