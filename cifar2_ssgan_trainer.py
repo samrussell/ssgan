@@ -111,11 +111,11 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.generator.summary()
 
     self.generator.compile(loss='categorical_crossentropy',
-                           optimizer=Adam(lr=2e-5),
+                           optimizer=Adam(lr=2e-4, beta_1=0.5),
                            metrics=['accuracy'])
 
     self.discriminator.compile(loss='categorical_crossentropy',
-                               optimizer=Adam(lr=2e-5),
+                               optimizer=Adam(lr=2e-4, beta_1=0.5),
                                metrics=['accuracy'])
 
     self.real_image_model = self.discriminator
@@ -125,7 +125,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.trainable = False
     self.fake_image_model.add(self.discriminator)
     self.fake_image_model.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=2e-5),
+                                  optimizer=Adam(lr=2e-4, beta_1=0.5),
                                   metrics=['accuracy'])
 
   def load_data(self):
