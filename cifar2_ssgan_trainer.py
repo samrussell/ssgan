@@ -105,6 +105,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.generator.add(Conv2D(96, (3, 3), padding='same'))
     #self.generator.add(BatchNormalization())
     self.generator.add(Activation(selu))
+    self.generator.add(Dropout(0.2))
     self.generator.add(Conv2D(3, (3, 3), padding='same'))
     self.generator.add(Activation('sigmoid'))
     self.generator.summary()

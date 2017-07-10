@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 class BaseTrainer:
   batch_size = 128
-  epochs = 120
+  epochs = 1200
   validation_percentage = 0.99
 
   def __init__(self):
@@ -48,8 +48,10 @@ class BaseTrainer:
     #num_fakes = int(num_samples / self.num_classes)
     #num_fakes = num_samples
     num_to_train = 1000
-    num_fakes_for_discriminator = int(num_to_train / self.num_classes)
-    num_fakes_for_generator = num_fakes_for_discriminator + num_to_train
+    #num_fakes_for_discriminator = int(num_to_train / self.num_classes)
+    #num_fakes_for_generator = num_fakes_for_discriminator + num_to_train
+    num_fakes_for_discriminator = num_to_train
+    num_fakes_for_generator = num_to_train * 2
     for i in xrange(self.epochs):
       for offset in range(0, num_samples, num_to_train)[:-1]:
         # we want the discriminator to guess the fakes
