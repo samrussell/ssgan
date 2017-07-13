@@ -47,7 +47,7 @@ class BaseTrainer:
     num_samples = training_values.shape[0]
     #num_fakes = int(num_samples / self.num_classes)
     #num_fakes = num_samples
-    num_to_train = 1000
+    num_to_train = 24000
     num_fakes_for_discriminator = int(num_to_train / 4)
     num_fakes_for_generator = num_fakes_for_discriminator + num_to_train
     for i in xrange(self.epochs):
@@ -61,11 +61,11 @@ class BaseTrainer:
         random_value_part = np.random.uniform(0,1,size=[num_fakes_for_generator,100-(self.num_classes+1)])
         fake_values = np.concatenate((fake_vectors, random_value_part), axis=1)
         fake_labels = to_categorical(np.full((num_fakes_for_generator, 1), self.num_classes), self.num_classes+1)
-        fake_images = self.generator.predict(fake_values, verbose=0)
+        fake_images = self.generator.predict(fake_values[:num_fakes_for_discriminator], verbose=0)
 
         print("training discriminator")
         self.discriminator.trainable = True
-        self.real_image_model.fit(np.concatenate((training_value_batch, fake_images[:num_fakes_for_discriminator])),
+        self.real_image_model.fit(np.concatenate((training_value_batch, fake_images)),
                   np.concatenate((training_label_batch, fake_labels[:num_fakes_for_discriminator])),
                   batch_size=self.batch_size,
                   epochs=1,
