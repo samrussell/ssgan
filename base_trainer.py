@@ -49,7 +49,7 @@ class BaseTrainer:
     #num_fakes = num_samples
     num_to_train = 24000
     num_fakes_for_discriminator = int(num_to_train / 4)
-    num_fakes_for_generator = num_fakes_for_discriminator + num_to_train
+    num_fakes_for_generator = num_fakes_for_discriminator
     for i in xrange(self.epochs):
       for offset in range(0, num_samples, num_to_train)[:-1]:
         # we want the discriminator to guess the fakes
