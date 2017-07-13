@@ -69,10 +69,10 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.generator = Sequential()
     self.generator.add(Dense(1000, input_shape=(100,)))
     self.generator.add(Activation(selu))
-    self.generator.add(Dropout(0.2))
+    self.generator.add(Dropout(0.5))
     self.generator.add(Dense(8*8*192))
     self.generator.add(Activation(selu))
-    self.generator.add(Dropout(0.2))
+    self.generator.add(Dropout(0.5))
     if keras.backend.image_data_format() == 'channels_first':
         self.generator.add(Reshape([192, 8, 8]))
     else:    
