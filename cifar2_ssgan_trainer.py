@@ -59,6 +59,8 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.add(Conv2D(192, (1, 1), padding = 'same'))
     self.discriminator.add(LeakyReLU(0.2))
     self.discriminator.add(Flatten())
+    self.discriminator.add(Dense(1000))
+    self.discriminator.add(LeakyReLU(0.2))
     self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Dense(1000))
     self.discriminator.add(LeakyReLU(0.2))
@@ -68,6 +70,9 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
 
     self.generator = Sequential()
     self.generator.add(Dense(1000, input_shape=(100,)))
+    self.generator.add(Activation(selu))
+    self.generator.add(Dropout(0.5))
+    self.generator.add(Dense(1000))
     self.generator.add(Activation(selu))
     self.generator.add(Dropout(0.5))
     self.generator.add(Dense(8*8*192))
