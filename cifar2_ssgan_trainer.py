@@ -6,6 +6,8 @@
 # Then based on STRIVING FOR SIMPLICITY: THE ALL CONVOLUTIONAL NET
 # https://arxiv.org/pdf/1412.6806.pdf
 # Code (c) Sam Russell 2017
+# this reaches 81% val accuracy and 99.9% training accuracy (overfitting quite hard)
+# it produces some passable images in the process though (not super high quality)
 
 import base_trainer
 from keras.models import Sequential, Model
