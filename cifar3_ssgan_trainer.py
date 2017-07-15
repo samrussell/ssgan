@@ -134,7 +134,8 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     x = layers.add([x, shortcut])
     input_tensor = Activation(selu)(x)
 
-    x = AveragePooling2D((4, 4))(input_tensor)
+    x = Conv2D(1024, (1, 1), padding="same", strides=(4, 4))(input_tensor)
+    x = Activation(selu)(x)
 
     x = Flatten()(x)
     x = Dense(1024)(x)
