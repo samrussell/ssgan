@@ -14,7 +14,7 @@
 import base_trainer
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D, UpSampling2D
+from keras.layers import Conv2D, MaxPooling2D, UpSampling2D, AveragePooling2D
 from keras.layers import Input
 from keras import layers
 from keras.layers.core import Activation, Reshape
@@ -133,6 +133,8 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     shortcut = Conv2D(1024, (1, 1), padding="same")(input_tensor)
     x = layers.add([x, shortcut])
     input_tensor = Activation(selu)(x)
+
+    x = AveragePooling2D((4, 4))(input_tensor)
 
     x = Flatten()(x)
     x = Dense(1024)(x)
