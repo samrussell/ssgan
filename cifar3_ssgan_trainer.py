@@ -134,32 +134,6 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     x = layers.add([x, shortcut])
     input_tensor = Activation(selu)(x)
 
-    # fourth layer
-    x = Conv2D(512, (1, 1), padding="same", strides=(2, 2))(input_tensor)
-    x = Activation(selu)(x)
-    x = Conv2D(512, (3, 3), padding="same")(x)
-    x = Activation(selu)(x)
-    x = Conv2D(2048, (1, 1), padding="same")(x)
-    shortcut = Conv2D(2048, (1, 1), padding="same", strides=(2, 2))(input_tensor)
-    x = layers.add([x, shortcut])
-    input_tensor = Activation(selu)(x)
-    x = Conv2D(512, (1, 1), padding="same")(input_tensor)
-    x = Activation(selu)(x)
-    x = Conv2D(512, (3, 3), padding="same")(x)
-    x = Activation(selu)(x)
-    x = Conv2D(2048, (1, 1), padding="same")(x)
-    shortcut = Conv2D(2048, (1, 1), padding="same")(input_tensor)
-    x = layers.add([x, shortcut])
-    input_tensor = Activation(selu)(x)
-    x = Conv2D(512, (1, 1), padding="same")(input_tensor)
-    x = Activation(selu)(x)
-    x = Conv2D(512, (3, 3), padding="same")(x)
-    x = Activation(selu)(x)
-    x = Conv2D(2048, (1, 1), padding="same")(x)
-    shortcut = Conv2D(2048, (1, 1), padding="same")(input_tensor)
-    x = layers.add([x, shortcut])
-    input_tensor = Activation(selu)(x)
-
     x = Flatten()(x)
     x = Dense(1024)(x)
     x = Activation(selu)(x)
@@ -215,11 +189,11 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.generator.summary()
 
     self.generator.compile(loss='categorical_crossentropy',
-                           optimizer=Adam(lr=1e-5, beta_1=0.5),
+                           optimizer=Adam(lr=1e-4, beta_1=0.5),
                            metrics=['accuracy'])
 
     self.discriminator.compile(loss='mean_squared_error',
-                               optimizer=Adam(lr=1e-5, beta_1=0.5),
+                               optimizer=Adam(lr=1e-4, beta_1=0.5),
                                metrics=['accuracy'])
 
     self.real_image_model = self.discriminator
@@ -229,7 +203,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.trainable = False
     self.fake_image_model.add(self.discriminator)
     self.fake_image_model.compile(loss='mean_squared_error',
-                                  optimizer=Adam(lr=1e-5, beta_1=0.5),
+                                  optimizer=Adam(lr=1e-4, beta_1=0.5),
                                   metrics=['accuracy'])
 
   def load_data(self):
