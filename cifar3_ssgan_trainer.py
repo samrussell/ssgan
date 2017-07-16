@@ -138,7 +138,9 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     x = Activation(selu)(x)
 
     x = Flatten()(x)
-    x = Dense(1024)(x)
+    x = Dense(1000)(x)
+    x = Activation(selu)(x)
+    x = Dense(1000)(x)
     x = Activation(selu)(x)
     x = Dense(1+self.num_classes, activation='linear')(x)
     self.discriminator = Model(image_input, x)
