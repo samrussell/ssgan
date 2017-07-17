@@ -81,6 +81,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     shortcut = Conv2D(256, (1, 1), padding="same")(input_tensor)
     x = layers.add([x, shortcut])
     input_tensor = Activation(selu)(x)
+    input_tensor = Dropout(0.2)(input_tensor)
 
     # second layer
     x = Conv2D(128, (1, 1), padding="same", strides=(2, 2))(input_tensor)
@@ -107,6 +108,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     shortcut = Conv2D(512, (1, 1), padding="same")(input_tensor)
     x = layers.add([x, shortcut])
     input_tensor = Activation(selu)(x)
+    input_tensor = Dropout(0.2)(input_tensor)
 
     # third layer
     x = Conv2D(256, (1, 1), padding="same", strides=(2, 2))(input_tensor)
@@ -133,6 +135,7 @@ class CifarSsganTrainer(base_trainer.BaseTrainer):
     shortcut = Conv2D(1024, (1, 1), padding="same")(input_tensor)
     x = layers.add([x, shortcut])
     input_tensor = Activation(selu)(x)
+    input_tensor = Dropout(0.2)(input_tensor)
 
     x = Conv2D(1024, (1, 1), padding="same", strides=(4, 4))(input_tensor)
     x = Activation(selu)(x)
