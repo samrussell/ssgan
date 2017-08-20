@@ -2,5 +2,6 @@ data/
 *.swp
 *.pyc
 *.png
+*.jpg
 *.h5
 .DS_Store

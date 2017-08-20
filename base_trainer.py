@@ -17,6 +17,7 @@ class BaseTrainer:
     self.parser = argparse.ArgumentParser()
     self.parser.add_argument('--save', help='save to file (default false)', default=False, action='store_true')
     self.parser.add_argument('--load', help='load from file (default false)', default=False, action='store_true')
+    self.parser.add_argument('--train', help='train network', default=False, action='store_true')
     #self.parser.add_argument('--train', help='training data CSV', required=True)
     #self.parser.add_argument('--test', help='test data CSV', required=True)
     #self.parser.add_argument('--output', help='output data CSV', required=True)
