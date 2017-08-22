@@ -62,8 +62,8 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
       self.generator.load_weights("generator.h5")
 
     num_samples = 1000
-    zero_vector = np.zeros(num_samples).astype(int)
-    one_vector = np.zeros(num_samples).astype(int)
+    zero_vector = np.zeros(num_samples)
+    one_vector = np.zeros(num_samples)
     one_vector.fill(1)
     labels_for_discriminator = np.concatenate((zero_vector, one_vector), axis=0)
     labels_for_generator = one_vector
@@ -158,6 +158,8 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.add(Activation(selu))
     self.discriminator.add(Dropout(0.5))
     self.discriminator.add(Flatten())
+    self.discriminator.add(Dense(100))
+    self.discriminator.add(Activation('sigmoid'))
     self.discriminator.add(Dense(1))
     self.discriminator.add(Activation('sigmoid'))
     self.discriminator.summary()
