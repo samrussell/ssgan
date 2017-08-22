@@ -72,8 +72,9 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
         if self.commandline_args.save:
           self.encoder.save_weights("encoder.h5")
           self.decoder.save_weights("decoder.h5")
-        self.save_results("test.png", training_values)
-    else:
+        if self.commandline_args.demo:
+          self.save_results("test.png", training_values)
+    elif self.commandline_args.demo:
       self.save_results("test.png", training_values)
 
   def plot_image(self, image, index):
@@ -93,31 +94,30 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     generated_vectors = self.encoder.predict(input_images)
     generated_images = self.decoder.predict(generated_vectors)
     #num_bits = 9
-    total_num_bits = 99
+    total_num_bits = 504
 
-    fixed_images = []
-    for index in xrange(total_num_bits):
-      vectors = []
-      for vector in generated_vectors:
+    vectors = []
+    for vector in generated_vectors:
+      for index in xrange(total_num_bits):
         vector_copy = np.copy(vector)
         vector_copy[index] = 1.0
         vectors.append(vector_copy)
-      fixed_images.append(self.decoder.predict(np.array(vectors)))
+    fixed_images = self.decoder.predict(np.array(vectors))
 
-    for num_bits in xrange(0, 99, 9):
+    for num_bits in xrange(0, total_num_bits, 9):
       plt.figure(figsize=(10,10))
 
-      for i in xrange(9):
+      for i in xrange(10):
         self.plot_image(input_images[i, :, :, :], i*10+1)
         for offset in xrange(9):
-          self.plot_image(fixed_images[offset+num_bits][i, :, :, :], i*10+2+offset)
+          self.plot_image(fixed_images[i*total_num_bits + offset + num_bits, :, :, :], i*10+2+offset)
       plt.tight_layout()
 
       plt.savefig("test%d.png" % num_bits)
       plt.close('all')
 
   def build_models(self, input_shape):
-    middle_neurons = 100
+    middle_neurons = 512
 
     self.encoder = Sequential()
     self.encoder.add(Conv2D(32, (3, 3), padding = 'same', input_shape=input_shape))
@@ -125,25 +125,30 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.encoder.add(Conv2D(32, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(MaxPooling2D(pool_size=(2, 2)))
+    self.encoder.add(Dropout(0.5))
     self.encoder.add(Conv2D(64, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(Conv2D(64, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(MaxPooling2D(pool_size=(2, 2)))
+    self.encoder.add(Dropout(0.5))
     self.encoder.add(Conv2D(128, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(Conv2D(128, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(MaxPooling2D(pool_size=(2, 2)))
+    self.encoder.add(Dropout(0.5))
     self.encoder.add(Conv2D(256, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(Conv2D(256, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(MaxPooling2D(pool_size=(2, 2)))
+    self.encoder.add(Dropout(0.5))
     self.encoder.add(Conv2D(512, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
     self.encoder.add(Conv2D(512, (3, 3), padding = 'same'))
     self.encoder.add(Activation(selu))
+    self.encoder.add(Dropout(0.5))
     self.encoder.add(Flatten())
     self.encoder.add(Dense(middle_neurons))
     self.encoder.add(Activation('sigmoid'))
@@ -162,25 +167,30 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.decoder.add(Conv2D(512, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(UpSampling2D(size=(2, 2)))
+    self.decoder.add(Dropout(0.5))
     self.decoder.add(Conv2D(256, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(Conv2D(256, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(UpSampling2D(size=(2, 2)))
+    self.decoder.add(Dropout(0.5))
     self.decoder.add(Conv2D(128, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(Conv2D(128, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(UpSampling2D(size=(2, 2)))
+    self.decoder.add(Dropout(0.5))
     self.decoder.add(Conv2D(64, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(Conv2D(64, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(UpSampling2D(size=(2, 2)))
+    self.decoder.add(Dropout(0.5))
     self.decoder.add(Conv2D(32, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
     self.decoder.add(Conv2D(32, (3, 3), padding='same'))
     self.decoder.add(Activation(selu))
+    self.decoder.add(Dropout(0.5))
     self.decoder.add(Conv2D(3, (3, 3), padding='same'))
     self.decoder.add(Activation('sigmoid'))
     self.decoder.summary()
@@ -197,7 +207,10 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     image_path = "celeba/img_align_celeba"
 
     filenames = os.listdir(image_path)
-    filenames = np.random.choice(filenames, 10000, replace=False)
+    if self.commandline_args.train:
+      filenames = np.random.choice(filenames, 100000, replace=False)
+    else:
+      filenames = np.random.choice(filenames, 10, replace=False)
     for filename in filenames:
       if filename.endswith(".jpg"):
         image = Image.open("%s/%s" % (image_path, filename)).convert('RGB')
