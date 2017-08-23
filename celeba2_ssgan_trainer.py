@@ -37,7 +37,6 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
   img_rows = 64
   img_cols = 64
   img_channels = 3
-  num_classes = 10
 
   def run(self):
     self.load_args()
@@ -126,6 +125,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
 
   def build_models(self, input_shape):
     middle_neurons = 100
+    dropout_rate = 0.0
 
     self.discriminator = Sequential()
     self.discriminator.add(Conv2D(32, (3, 3), padding = 'same', input_shape=input_shape))
@@ -133,35 +133,38 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.add(Conv2D(32, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(MaxPooling2D(pool_size=(2, 2)))
-    self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(dropout_rate))
     self.discriminator.add(Conv2D(64, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(Conv2D(64, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(MaxPooling2D(pool_size=(2, 2)))
-    self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(dropout_rate))
     self.discriminator.add(Conv2D(128, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(Conv2D(128, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(MaxPooling2D(pool_size=(2, 2)))
-    self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(dropout_rate))
     self.discriminator.add(Conv2D(256, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(Conv2D(256, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(MaxPooling2D(pool_size=(2, 2)))
-    self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(dropout_rate))
     self.discriminator.add(Conv2D(512, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
     self.discriminator.add(Conv2D(512, (3, 3), padding = 'same'))
     self.discriminator.add(Activation(selu))
-    self.discriminator.add(Dropout(0.5))
+    self.discriminator.add(Dropout(dropout_rate))
     self.discriminator.add(Flatten())
-    self.discriminator.add(Dense(100))
+    self.discriminator.add(Dense(1000))
     self.discriminator.add(Activation('sigmoid'))
     self.discriminator.add(Dense(1))
     self.discriminator.add(Activation('sigmoid'))
+    self.discriminator.compile(loss='binary_crossentropy',
+                                  optimizer=Adam(lr=1e-4),
+                                  metrics=['accuracy'])
     self.discriminator.summary()
 
     self.generator = Sequential()
@@ -177,47 +180,52 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.generator.add(Conv2D(512, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.5))
+    self.generator.add(Dropout(dropout_rate))
     self.generator.add(Conv2D(256, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(Conv2D(256, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.5))
+    self.generator.add(Dropout(dropout_rate))
     self.generator.add(Conv2D(128, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(Conv2D(128, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.5))
+    self.generator.add(Dropout(dropout_rate))
     self.generator.add(Conv2D(64, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(Conv2D(64, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(UpSampling2D(size=(2, 2)))
-    self.generator.add(Dropout(0.5))
+    self.generator.add(Dropout(dropout_rate))
     self.generator.add(Conv2D(32, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
     self.generator.add(Conv2D(32, (3, 3), padding='same'))
     self.generator.add(Activation(selu))
-    self.generator.add(Dropout(0.5))
+    self.generator.add(Dropout(dropout_rate))
     self.generator.add(Conv2D(3, (3, 3), padding='same'))
     self.generator.add(Activation('sigmoid'))
+    self.generator.compile(loss='binary_crossentropy',
+                                  optimizer=Adam(lr=1e-4),
+                                  metrics=['accuracy'])
     self.generator.summary()
 
     self.discriminator_trainer = Sequential()
     self.discriminator_trainer.add(self.discriminator)
     self.discriminator_trainer.compile(loss='binary_crossentropy',
-                                  optimizer=Adam(lr=1e-5),
+                                  optimizer=Adam(lr=1e-4),
                                   metrics=['accuracy'])
+    self.discriminator_trainer.summary()
 
     self.generator_trainer = Sequential()
     self.generator_trainer.add(self.generator)
     self.discriminator.trainable = False
     self.generator_trainer.add(self.discriminator)
     self.generator_trainer.compile(loss='binary_crossentropy',
-                                  optimizer=Adam(lr=1e-5),
+                                  optimizer=Adam(lr=1e-4),
                                   metrics=['accuracy'])
+    self.generator_trainer.summary()
 
   def load_data(self):
     images = []
