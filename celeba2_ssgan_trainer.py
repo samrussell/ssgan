@@ -18,6 +18,7 @@ from keras.activations import *
 from keras.utils import to_categorical
 from PIL import Image
 import keras
+import keras.backend as K
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
@@ -61,24 +62,23 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
       self.generator.load_weights("generator.h5")
 
     num_samples = 1000
-    zero_vector = np.zeros(num_samples)
-    one_vector = np.zeros(num_samples)
-    one_vector.fill(1)
+    zero_vector = np.repeat([[0, 1]], num_samples, axis=0)
+    one_vector = np.repeat([[1, 0]], num_samples, axis=0)
     labels_for_discriminator = np.concatenate((zero_vector, one_vector), axis=0)
-    labels_for_generator = one_vector
+    labels_for_generator = np.concatenate((one_vector, one_vector), axis=0)
 
     if self.commandline_args.train:
       while True:
         real_sample = training_values[np.random.choice(training_values.shape[0], num_samples, replace=False)]
-        vectors = np.random.rand(num_samples, 100)
+        vectors = np.random.rand(num_samples*2, 100)
         print("Generating fake images")
-        fake_sample = self.generator.predict(vectors, verbose=1)
+        fake_sample = self.generator.predict(vectors[:1000], verbose=1)
 
         print("Training discriminator")
         # labels are 00000...111111
         # values are fakefakefakefake...realrealrealreal
         samples = np.concatenate((fake_sample, real_sample), axis=0)
-        self.discriminator_trainer.fit(samples, labels_for_discriminator,
+        self.discriminator.fit(samples, labels_for_discriminator,
               batch_size=self.batch_size,
               epochs=1,
               verbose=1)
@@ -125,7 +125,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
 
   def build_models(self, input_shape):
     middle_neurons = 100
-    dropout_rate = 0.0
+    dropout_rate = 0.2
 
     self.discriminator = Sequential()
     self.discriminator.add(Conv2D(32, (3, 3), padding = 'same', input_shape=input_shape))
@@ -160,11 +160,10 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.add(Flatten())
     self.discriminator.add(Dense(1000))
     self.discriminator.add(Activation('sigmoid'))
-    self.discriminator.add(Dense(1))
-    self.discriminator.add(Activation('sigmoid'))
-    self.discriminator.compile(loss='binary_crossentropy',
-                                  optimizer=Adam(lr=1e-4),
-                                  metrics=['accuracy'])
+    self.discriminator.add(Dense(2))
+    self.discriminator.add(Activation('softmax'))
+    self.discriminator.compile(loss='categorical_crossentropy',
+                                  optimizer=Adam(lr=1e-5))
     self.discriminator.summary()
 
     self.generator = Sequential()
@@ -206,25 +205,17 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.generator.add(Dropout(dropout_rate))
     self.generator.add(Conv2D(3, (3, 3), padding='same'))
     self.generator.add(Activation('sigmoid'))
-    self.generator.compile(loss='binary_crossentropy',
-                                  optimizer=Adam(lr=1e-4),
-                                  metrics=['accuracy'])
+    self.generator.compile(loss='categorical_crossentropy',
+                                  optimizer=Adam(lr=1e-5))
     self.generator.summary()
 
-    self.discriminator_trainer = Sequential()
-    self.discriminator_trainer.add(self.discriminator)
-    self.discriminator_trainer.compile(loss='binary_crossentropy',
-                                  optimizer=Adam(lr=1e-4),
-                                  metrics=['accuracy'])
-    self.discriminator_trainer.summary()
-
-    self.generator_trainer = Sequential()
-    self.generator_trainer.add(self.generator)
     self.discriminator.trainable = False
-    self.generator_trainer.add(self.discriminator)
-    self.generator_trainer.compile(loss='binary_crossentropy',
-                                  optimizer=Adam(lr=1e-4),
-                                  metrics=['accuracy'])
+    gan_input = Input(shape=(middle_neurons,))
+    x = self.generator(gan_input)
+    gan_output = self.discriminator(x)
+    self.generator_trainer = Model(gan_input, gan_output)
+    self.generator_trainer.compile(loss='categorical_crossentropy',
+                                  optimizer=Adam(lr=1e-5))
     self.generator_trainer.summary()
 
   def load_data(self):
@@ -235,7 +226,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     if self.commandline_args.train:
       filenames = np.random.choice(filenames, 10000, replace=False)
     else:
-      filenames = np.random.choice(filenames, 10, replace=False)
+      filenames = np.random.choice(filenames, 100, replace=False)
     for filename in filenames:
       if filename.endswith(".jpg"):
         image = Image.open("%s/%s" % (image_path, filename)).convert('RGB')
