@@ -65,12 +65,14 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     zero_vector = np.repeat([[0, 1]], num_samples, axis=0)
     one_vector = np.repeat([[1, 0]], num_samples, axis=0)
     labels_for_discriminator = np.concatenate((zero_vector, one_vector), axis=0)
-    labels_for_generator = np.concatenate((one_vector, one_vector), axis=0)
+    labels_for_generator = one_vector #np.concatenate((one_vector, one_vector), axis=0)
 
     if self.commandline_args.train:
+      epoch = 0
       while True:
+        epoch += 1
         real_sample = training_values[np.random.choice(training_values.shape[0], num_samples, replace=False)]
-        vectors = np.random.rand(num_samples*2, 100)
+        vectors = np.random.rand(num_samples, 100)
         print("Generating fake images")
         fake_sample = self.generator.predict(vectors[:1000], verbose=1)
 
@@ -96,7 +98,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
           self.generator.save_weights("generator.h5")
         if self.commandline_args.demo:
           print("Saving demo")
-          self.save_results("test.png", fake_sample)
+          self.save_results("test%s.png" % epoch, fake_sample)
     elif self.commandline_args.demo:
       print("Saving demo")
       self.save_results("test.png", fake_sample)
@@ -125,7 +127,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
 
   def build_models(self, input_shape):
     middle_neurons = 100
-    dropout_rate = 0.0
+    dropout_rate = 0.01
 
     self.discriminator = Sequential()
     self.discriminator.add(Conv2D(32, (3, 3), padding = 'same', input_shape=input_shape))
@@ -224,7 +226,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
 
     filenames = os.listdir(image_path)
     if self.commandline_args.train:
-      filenames = np.random.choice(filenames, 10000, replace=False)
+      filenames = np.random.choice(filenames, 40000, replace=False)
     else:
       filenames = np.random.choice(filenames, 100, replace=False)
     for filename in filenames:
