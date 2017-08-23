@@ -125,7 +125,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
 
   def build_models(self, input_shape):
     middle_neurons = 100
-    dropout_rate = 0.2
+    dropout_rate = 0.0
 
     self.discriminator = Sequential()
     self.discriminator.add(Conv2D(32, (3, 3), padding = 'same', input_shape=input_shape))
@@ -163,7 +163,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.discriminator.add(Dense(2))
     self.discriminator.add(Activation('softmax'))
     self.discriminator.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-5))
+                                  optimizer=Adam(lr=1e-6))
     self.discriminator.summary()
 
     self.generator = Sequential()
@@ -206,7 +206,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     self.generator.add(Conv2D(3, (3, 3), padding='same'))
     self.generator.add(Activation('sigmoid'))
     self.generator.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-5))
+                                  optimizer=Adam(lr=1e-6))
     self.generator.summary()
 
     self.discriminator.trainable = False
@@ -215,7 +215,7 @@ class CelebaSsganTrainer(base_trainer.BaseTrainer):
     gan_output = self.discriminator(x)
     self.generator_trainer = Model(gan_input, gan_output)
     self.generator_trainer.compile(loss='categorical_crossentropy',
-                                  optimizer=Adam(lr=1e-5))
+                                  optimizer=Adam(lr=1e-6))
     self.generator_trainer.summary()
 
   def load_data(self):
